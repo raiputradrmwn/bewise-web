@@ -35,20 +35,25 @@ const Footer = () => {
         {/* Quick Links Section */}
         <div>
           <h4 className="text-lg font-bold">Quick Links</h4>
-          <ul className="mt-4 space-y-2 text-sm text-gray-600">
+          <ul className="mt-4 space-y-2 text-sm text-black opacity-60">
             <li>
-              <Link href="/" className="hover:text-blue-600">
+              <Link href="/" className="hover:text-[#2B59C3]">
                 Home
               </Link>
             </li>
             <li>
-              <Link href="#How it Works" className="hover:text-blue-600">
+              <Link href="#How it Works" className="hover:text-[#2B59C3]">
                 How it Works
               </Link>
             </li>
             <li>
-              <Link href="#FAQ" className="hover:text-blue-600">
+              <Link href="#FAQ" className="hover:text-[#2B59C3]">
                 FAQ
+              </Link>
+            </li>
+            <li>
+              <Link href="/team" className="hover:text-[#2B59C3]">
+                Team
               </Link>
             </li>
           </ul>
