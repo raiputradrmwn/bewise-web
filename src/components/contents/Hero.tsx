@@ -1,8 +1,25 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import Image from "next/image";
+import { SkeletonHomeHero } from "./SkeletonCard";
 
 const Hero = () => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500); // Simulate loading delay
+
+    return () => clearTimeout(timer); // Cleanup timer on component unmount
+  }, []);
+
+  if (isLoading) {
+    return (
+        <SkeletonHomeHero /> 
+    );
+  }
   return (
     <section
       id="Home"
@@ -28,7 +45,7 @@ const Hero = () => {
       </div>
 
       {/* Decorative Image */}
-      <div className="relative mt-10 flex justify-center">
+      <div className="relative mt-16 flex justify-center">
         <Image
           src="/img/Hero1.svg" // Replace with your image path
           alt="Hero Section"

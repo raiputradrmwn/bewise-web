@@ -1,7 +1,24 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { SkeletonHowItWorks } from "./SkeletonCard";
 
 const HowItWorks = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500); // Simulate loading delay
+  
+      return () => clearTimeout(timer); // Cleanup timer on component unmount
+    }, []);
+  
+    if (isLoading) {
+      return (
+          <SkeletonHowItWorks /> 
+      );
+    }
   return (
     <section id="How it Works">
       {/* Header Biru */}

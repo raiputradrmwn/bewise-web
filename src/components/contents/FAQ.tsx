@@ -1,12 +1,26 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { SkeletonFAQ } from "./SkeletonCard";
 
-const FAQs = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
+const FAQ = () => {
+    const [isLoading, setIsLoading] = useState(true);
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500); // Simulate loading delay
+  
+      return () => clearTimeout(timer); // Cleanup timer on component unmount
+    }, []);
+  
+    if (isLoading) {
+      return (
+          <SkeletonFAQ /> 
+      );
+    }
   const faqData = [
     {
       question: "What is the main purpose of this application?",
@@ -131,4 +145,4 @@ const FAQs = () => {
   );
 };
 
-export default FAQs;
+export default FAQ;

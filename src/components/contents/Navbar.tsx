@@ -3,12 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "../ui/button";
 import NavbarMobile from "./NavbarMobile";
 
 export default function Navbar() {
-  const [activeSection, setActiveSection] = useState<string>("home");
-  const sections = ["Home", "How it Works", "FAQ"]; // Sections for navigation
+  const [activeSection, setActiveSection] = useState<string>("Home");
+  const sections = ["Home", "How it Works", "FAQ"];
+  const pathname = usePathname();
 
   const handleNavigationClick = (
     id: string,
@@ -25,6 +27,28 @@ export default function Navbar() {
     }
   };
 
+  const handleHomeClick = (
+    section: string,
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    e.preventDefault();
+    if (pathname === "/") {
+      handleNavigationClick(section, e);
+    } else {
+      window.location.href = `/#${section}`;
+    }
+  };
+
+  const handleRouteClick = (
+    href: string,
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>
+  ) => {
+    if (pathname === href) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -34,9 +58,7 @@ export default function Navbar() {
           }
         });
       },
-      {
-        threshold: 0.6,
-      }
+      { threshold: 0.6 }
     );
 
     sections.forEach((section) => {
@@ -69,28 +91,37 @@ export default function Navbar() {
           <li
             key={section}
             className={`cursor-pointer ${
-              activeSection === section ? "text-[#2B59C3] font-bold" : "font-bold"
+              activeSection === section && pathname === "/"
+                ? "text-[#2B59C3] font-bold"
+                : "font-bold"
             }`}
           >
-            <a
-              href={`#${section}`}
-              onClick={(e) => handleNavigationClick(section, e)}
-            >
+            <a href={`/#${section}`} onClick={(e) => handleHomeClick(section, e)}>
               {section}
             </a>
           </li>
         ))}
+        <li>
+          <Link
+            href="/team"
+            onClick={(e) => handleRouteClick("/team", e)}
+            className={`cursor-pointer ${
+              pathname === "/team" ? "text-[#2B59C3] font-bold" : "font-bold"
+            }`}
+          >
+            Team
+          </Link>
+        </li>
       </ul>
 
       {/* Action Buttons for Desktop */}
       <div className="hidden md:flex space-x-4">
         <Button className="bg-[#2B59C3] font-bold text-white text-[16px] py-2 px-6 rounded-xl hover:bg-[#2B59C3]/90">
-          Contact
+          <Link href="mailto:support@bewise.com">Contact</Link>
         </Button>
       </div>
-
       {/* Mobile Navbar */}
-      <NavbarMobile/>
+      <NavbarMobile />
     </nav>
   );
 }
