@@ -16,7 +16,7 @@ const teamMembers = [
   },
   {
     name: "Raihan Putra Darmawan",
-    position: "Fullstack Developer",
+    position: "Frontend Developer",
     image: "/img/team/rhn.png",
   },
   {

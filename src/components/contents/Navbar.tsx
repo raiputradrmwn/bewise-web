@@ -21,7 +21,7 @@ export default function Navbar() {
     if (section) {
       const headerOffset = document.querySelector("nav")?.offsetHeight || 0;
       const sectionPosition =
-        section.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+        section.getBoundingClientRect().top + window.pageYOffset - headerOffset + 5;
 
       window.scrollTo({ top: sectionPosition, behavior: "smooth" });
     }
@@ -50,31 +50,26 @@ export default function Navbar() {
   };
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.6 }
-    );
+    const handleScroll = () => {
+      let currentSection = "Home";
 
-    sections.forEach((section) => {
-      const element = document.getElementById(section);
-      if (element) {
-        observer.observe(element);
-      }
-    });
-
-    return () => {
       sections.forEach((section) => {
         const element = document.getElementById(section);
         if (element) {
-          observer.unobserve(element);
+          const rect = element.getBoundingClientRect();
+          if (rect.top <= 80 && rect.bottom > 80) {
+            currentSection = section;
+          }
         }
       });
+
+      setActiveSection(currentSection);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [sections]);
 
