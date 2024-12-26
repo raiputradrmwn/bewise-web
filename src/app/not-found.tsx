@@ -1,4 +1,3 @@
-import { poppins } from "@/styles/font";
 import Link from "next/link";
 
 const NotFound = () => {

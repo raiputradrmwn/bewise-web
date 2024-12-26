@@ -41,9 +41,9 @@ export default function Team() {
     <section className="py-16 px-6 md:px-12 max-w-7xl mx-auto text-center">
       {/* Title */}
       <h1 className="text-3xl mb-16 sm:text-4xl md:text-5xl font-bold leading-tight">
-        "Meet <span className="text-[#2B59C3]">The Team</span> Committed to
+      &quot;Meet <span className="text-[#2B59C3]">The Team</span> Committed to
         <br />
-        Empowering <span className="text-[#2B59C3]">Healthier</span> Lifestyles"
+        Empowering <span className="text-[#2B59C3]">Healthier</span> Lifestyles&quot;
       </h1>
 
       {/* Team Members */}

@@ -127,7 +127,7 @@ const MobileNav = () => {
         <ul className="flex flex-col font-bold p-4 gap-3 mt-4 bg-gray-50 rounded-lg shadow-lg">
           {/* Home Link */}
           <li>
-            <a
+            <Link
               href="/#Home"
               onClick={(e) => handleNavigationClick("Home", e)}
               className={`block py-2 px-4 rounded-md ${
@@ -137,11 +137,11 @@ const MobileNav = () => {
               }`}
             >
               Home
-            </a>
+            </Link>
           </li>
           {/* How It Works Section */}
           <li>
-            <a
+            <Link
               href="/#How it Works"
               onClick={(e) => handleNavigationClick("How it Works", e)}
               className={`block py-2 px-4 rounded-md ${
@@ -151,11 +151,11 @@ const MobileNav = () => {
               }`}
             >
               How it Works
-            </a>
+            </Link>
           </li>
           {/* FAQ Section */}
           <li>
-            <a
+            <Link
               href="/#FAQ"
               onClick={(e) => handleNavigationClick("FAQ", e)}
               className={`block py-2 px-4 rounded-md ${
@@ -165,7 +165,7 @@ const MobileNav = () => {
               }`}
             >
               FAQ
-            </a>
+            </Link>
           </li>
           {/* Team Route */}
           <li>
@@ -183,12 +183,12 @@ const MobileNav = () => {
           </li>
           {/* Contact */}
           <li>
-            <a
+            <Link
               href="mailto:support@bewise.com"
               className="block py-2 px-4 text-gray-700 hover:text-blue-600 hover:bg-gray-100 rounded-md"
             >
               Contact
-            </a>
+            </Link>
           </li>
         </ul>
       </div>

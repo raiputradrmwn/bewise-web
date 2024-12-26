@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
-
+import Image from "next/image";
 interface Product {
   id: number;
   name: string;
@@ -60,7 +60,7 @@ export const Database = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [DATABASE_API_URL]);
 
   return (
     <div className="min-h-screen p-6">
@@ -76,7 +76,7 @@ export const Database = () => {
               key={product.id}
               className="bg-white shadow-md rounded-lg overflow-hidden"
             >
-              <img
+              <Image
                 src={product.photo}
                 alt={product.name}
                 className="w-full h-48 object-cover"
@@ -97,7 +97,7 @@ export const Database = () => {
                 </div>
                 <div className="mt-3 flex items-center">
                   <p className="text-sm">Label: </p>
-                  <img
+                  <Image
                     src={product.label.link}
                     alt={`Label ${product.label.name}`}
                     className="w-6 h-6 ml-2"
