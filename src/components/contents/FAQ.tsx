@@ -104,7 +104,7 @@ const FAQ = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button className="flex items-center bg-black text-white px-4 py-7 rounded-lg hover:bg-gray-800 transition">
+            <Button className="flex items-center bg-black text-white px-6 py-7 rounded-lg hover:bg-gray-800 transition">
               <Image
                 src="/img/playstore.svg"
                 alt="Google Play"
@@ -125,7 +125,7 @@ const FAQ = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            <Button className="flex items-center bg-black text-white px-4 py-7 rounded-lg hover:bg-gray-800 transition">
+            <Button className="flex items-center bg-black text-white px-6 py-7 rounded-lg hover:bg-gray-800 transition">
               <Image
                 src="/img/apple1.svg"
                 alt="App Store"
