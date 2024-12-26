@@ -1,0 +1,33 @@
+name: Deploy to Railway PROD ENV
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+        
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Build Project (if applicable)
+        run: npm run build --if-present
+
+      - name: Deploy to Railway
+        run: railway up --service ${{ secrets.RAILWAY_SERVICE_ID_PROD }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_PROD_TOKEN }}
