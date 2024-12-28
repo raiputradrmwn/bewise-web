@@ -69,7 +69,7 @@ export const Login = () => {
         <div className="flex flex-col items-center w-full max-w-2xl">
           <Link href="/">
             <Image
-              src="/img/Logo.svg"
+              src="/img/logo.svg"
               alt="Logo"
               width={800}
               height={800}
