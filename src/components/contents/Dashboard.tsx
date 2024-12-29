@@ -78,7 +78,7 @@ export const Dashboard = () => {
 
         const data = await response.json();
         setCategories(data.data.categories);
-      } catch (err) {
+      } catch {
         toast.error("Failed to load categories.");
       }
     };
