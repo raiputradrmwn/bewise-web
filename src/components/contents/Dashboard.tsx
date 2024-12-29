@@ -147,7 +147,7 @@ export const Dashboard = () => {
       toast.success("Product added successfully!");
       setTimeout(() => {
         router.push("/dashboard");
-      }, 2000);
+      }, 700);
     } catch (err: unknown) {
       if (err instanceof Error) {
         toast.error(err.message);
