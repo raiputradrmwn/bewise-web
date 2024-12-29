@@ -79,6 +79,8 @@ export const Database = () => {
               <Image
                 src={product.photo}
                 alt={product.name}
+                width={500}
+                height={500} 
                 className="w-full h-48 object-cover"
               />
               <div className="p-4">
@@ -100,6 +102,8 @@ export const Database = () => {
                   <Image
                     src={product.label.link}
                     alt={`Label ${product.label.name}`}
+                    width={30}
+                    height={30}
                     className="w-6 h-6 ml-2"
                   />
                 </div>
