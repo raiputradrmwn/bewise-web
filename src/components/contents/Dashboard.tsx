@@ -3,29 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
+import { useForm } from "react-hook-form";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-interface NutritionFact {
-  energy: number | "";
-  saturated_fat: number | "";
-  sugar: number | "";
-  sodium: number | "";
-  protein: number | "";
-  fiber: number | "";
-  fruit_vegetable: number | "";
-}
-
-interface FormData {
-  name: string;
-  brand: string;
-  photo: string;
-  category_product_id: number | "";
-  barcode: string;
-  price_a: number | "";
-  price_b: number | "";
-  nutritionFact: NutritionFact;
-}
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface Category {
   id: number;
@@ -36,41 +20,26 @@ interface Category {
 export const Dashboard = () => {
   const token = Cookies.get("token");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [formData, setFormData] = useState<FormData>({
-    name: "",
-    brand: "",
-    photo: "",
-    category_product_id: "",
-    barcode: "",
-    price_a: "",
-    price_b: "",
-    nutritionFact: {
-      energy: "",
-      saturated_fat: "",
-      sugar: "",
-      sodium: "",
-      protein: "",
-      fiber: "",
-      fruit_vegetable: "",
-    },
-  });
-  const [loading, setLoading] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const router = useRouter();
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm();
 
-  // Fetch categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(
-          "https://prod-bewise.up.railway.app/api/v1/categories/products",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await fetch(`${API_BASE_URL}/categories/products`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!response.ok) {
           throw new Error("Failed to fetch categories.");
@@ -86,57 +55,41 @@ export const Dashboard = () => {
     fetchCategories();
   }, []);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]:
-        name === "category_product_id" ||
-        name === "price_a" ||
-        name === "price_b"
-          ? parseFloat(value)
-          : value,
-    });
-  };
-
-  const handleNutritionFactChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name in formData.nutritionFact) {
-      setFormData({
-        ...formData,
-        nutritionFact: {
-          ...formData.nutritionFact,
-          [name]: parseFloat(value) || 0,
-        },
-      });
+  const onSubmit = async (data: any) => {
+    if (!data.photo[0]) {
+      toast.error("Please upload a product photo.");
+      return;
     }
-  };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-
-    // Determine the endpoint based on category type
-    const category = categories.find(
-      (cat) => cat.id === formData.category_product_id
-    );
+    const category = categories.find((cat) => cat.id === parseInt(data.category_product_id));
     const endpoint =
       category?.type === "BEVERAGE"
-        ? "https://prod-bewise.up.railway.app/api/v1/products/beverages"
-        : "https://prod-bewise.up.railway.app/api/v1/products/foods";
+        ? `${API_BASE_URL}/products/beverages`
+        : `${API_BASE_URL}/products/foods`;
+
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("brand", data.brand);
+    formData.append("photo", data.photo[0]);
+    formData.append("category_product_id", data.category_product_id);
+    formData.append("barcode", data.barcode);
+    formData.append("price_a", data.price_a);
+    formData.append("price_b", data.price_b);
+    formData.append("nutritionFact.energy", data.energy);
+    formData.append("nutritionFact.saturated_fat", data.saturated_fat);
+    formData.append("nutritionFact.sugar", data.sugar);
+    formData.append("nutritionFact.sodium", data.sodium);
+    formData.append("nutritionFact.protein", data.protein);
+    formData.append("nutritionFact.fiber", data.fiber);
+    formData.append("nutritionFact.fruit_vegetable", data.fruit_vegetable);
 
     try {
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -152,167 +105,73 @@ export const Dashboard = () => {
       if (err instanceof Error) {
         toast.error(err.message);
       }
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setPreviewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gray-100 flex justify-center items-center">
+    <div className="min-h-screen p-4 flex justify-center items-center">
       <ToastContainer />
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
         <h1 className="text-2xl font-bold mb-6">Add New Product</h1>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              name="name"
-              placeholder="Product Name"
-              value={formData.name}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="text"
-              name="brand"
-              placeholder="Brand"
-              value={formData.brand}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="text"
-              name="photo"
-              placeholder="Photo URL"
-              value={formData.photo}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="text"
-              name="barcode"
-              placeholder="Barcode"
-              value={formData.barcode}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="price_a"
-              placeholder="Price A"
-              value={formData.price_a}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="price_b"
-              placeholder="Price B"
-              value={formData.price_b}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <select
-              name="category_product_id"
-              value={formData.category_product_id}
-              onChange={handleInputChange}
-              className="p-2 border rounded-md"
-              required
-            >
-              <option value="">Select Category</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
+            <Label>Name</Label>
+            <Input type="text" {...register("name", { required: true })} placeholder="Product Name" />
+
+            <Label>Brand</Label>
+            <Input type="text" {...register("brand", { required: true })} placeholder="Brand" />
+
+            <Label>Barcode</Label>
+            <Input type="text" {...register("barcode", { required: true })} placeholder="Barcode" />
+
+            <Label>Price A</Label>
+            <Input type="number" {...register("price_a", { required: true })} placeholder="Price A" />
+
+            <Label>Price B</Label>
+            <Input type="number" {...register("price_b", { required: true })} placeholder="Price B" />
+
+            <Label>Category</Label>
+            <Select onValueChange={(value) => setValue("category_product_id", value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((category) => (
+                  <SelectItem key={category.id} value={category.id.toString()}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Label>Product Photo</Label>
+            <Input type="file" accept="image/*" {...register("photo", { required: true })} onChange={handleFileChange} />
           </div>
+
+          {previewImage && <img src={previewImage} alt="Preview" className="mt-4 w-32 h-32 object-cover" />}
 
           <h2 className="text-lg font-bold mt-6 mb-4">Nutrition Facts</h2>
           <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              name="energy"
-              placeholder="Energy"
-              value={formData.nutritionFact.energy}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="saturated_fat"
-              placeholder="Saturated Fat"
-              value={formData.nutritionFact.saturated_fat}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="sugar"
-              placeholder="Sugar"
-              value={formData.nutritionFact.sugar}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="sodium"
-              placeholder="Sodium"
-              value={formData.nutritionFact.sodium}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="protein"
-              placeholder="Protein"
-              value={formData.nutritionFact.protein}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="fiber"
-              placeholder="Fiber"
-              value={formData.nutritionFact.fiber}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
-            <input
-              type="number"
-              name="fruit_vegetable"
-              placeholder="Fruit & Vegetable"
-              value={formData.nutritionFact.fruit_vegetable}
-              onChange={handleNutritionFactChange}
-              className="p-2 border rounded-md"
-              required
-            />
+            {["energy", "saturated_fat", "sugar", "sodium", "protein", "fiber", "fruit_vegetable"].map((key) => (
+              <Input key={key} type="number" {...register(key, { required: true })} placeholder={key.replace("_", " ")} />
+            ))}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full p-3 rounded-md mt-6 font-bold transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 text-white hover:bg-blue-700"
-            }`}
-          >
-            {loading ? "Processing..." : "Add Product"}
-          </button>
+          <Button type="submit" className="w-full mt-6" disabled={isSubmitting}>
+            {isSubmitting ? "Processing..." : "Add Product"}
+          </Button>
         </form>
       </div>
     </div>
