@@ -1,4 +1,4 @@
-import { Home, Settings, Search } from "lucide-react";
+import { Home, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import {
