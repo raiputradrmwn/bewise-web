@@ -17,18 +17,36 @@ interface Category {
   type: "BEVERAGE" | "FOOD";
 }
 
+interface ProductFormData {
+  name: string;
+  brand: string;
+  barcode: string;
+  price_a: string;
+  price_b: string;
+  category_product_id: string;
+  photo: FileList;
+  energy: string;
+  saturated_fat: string;
+  sugar: string;
+  sodium: string;
+  protein: string;
+  fiber: string;
+  fruit_vegetable: string;
+}
+
 export const Dashboard = () => {
   const token = Cookies.get("token");
   const [categories, setCategories] = useState<Category[]>([]);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const router = useRouter();
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
   const {
     register,
     handleSubmit,
     setValue,
     formState: { isSubmitting },
-  } = useForm();
+  } = useForm<ProductFormData>(); // 👈 Tambahkan generic type
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -55,8 +73,8 @@ export const Dashboard = () => {
     fetchCategories();
   }, []);
 
-  const onSubmit = async (data: any) => {
-    if (!data.photo[0]) {
+  const onSubmit = async (data: ProductFormData) => {
+    if (!data.photo || data.photo.length === 0) {
       toast.error("Please upload a product photo.");
       return;
     }
@@ -70,7 +88,7 @@ export const Dashboard = () => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("brand", data.brand);
-    formData.append("photo", data.photo[0]);
+    formData.append("photo", data.photo[0]); // 👈 Ambil file pertama dari FileList
     formData.append("category_product_id", data.category_product_id);
     formData.append("barcode", data.barcode);
     formData.append("price_a", data.price_a);
@@ -165,7 +183,7 @@ export const Dashboard = () => {
           <h2 className="text-lg font-bold mt-6 mb-4">Nutrition Facts</h2>
           <div className="grid grid-cols-2 gap-4">
             {["energy", "saturated_fat", "sugar", "sodium", "protein", "fiber", "fruit_vegetable"].map((key) => (
-              <Input key={key} type="number" {...register(key, { required: true })} placeholder={key.replace("_", " ")} />
+              <Input key={key} type="number" {...register(key as keyof ProductFormData, { required: true })} placeholder={key.replace("_", " ")} />
             ))}
           </div>
 
