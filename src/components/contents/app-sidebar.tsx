@@ -42,9 +42,8 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <Link
                       href={item.url}
-                      className="flex items-center gap-5 px-8 py-5 text-xl font-medium text-gray-900 hover:bg-gray-300 rounded-lg transition-all"
+                      className="flex items-center gap-5 px-8 py-5 text-[18px] font-medium text-gray-900 hover:bg-gray-300 rounded-lg transition-all"
                     >
-                      {/* Perbesar ikon dan beri warna lebih gelap */}
                       <item.icon className="w-8 h-8 text-gray-700" />
                       <span>{item.title}</span>
                     </Link>
