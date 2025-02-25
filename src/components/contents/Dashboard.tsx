@@ -187,7 +187,7 @@ export const Dashboard = () => {
             ))}
           </div>
 
-          <Button type="submit" className="w-full mt-6" disabled={isSubmitting}>
+          <Button type="submit" className="w-full mt-6 bg-[#2B59C3] hover:bg-[#2B59C3]" disabled={isSubmitting}>
             {isSubmitting ? "Processing..." : "Add Product"}
           </Button>
         </form>

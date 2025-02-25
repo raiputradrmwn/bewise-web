@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import useSWR from "swr";   
+import useSWR, { mutate } from "swr"; // Gunakan mutate untuk update cache
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Skeleton } from "@/components/ui/skeleton"; // ShadCN UI Skeleton
+import { Skeleton } from "@/components/ui/skeleton";
+import { Trash2 } from "lucide-react"; // Icon delete dari Lucide
 
 interface Product {
   id: number;
@@ -51,12 +52,39 @@ export const Database = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const SEARCH_API_URL = `${API_BASE_URL}/products/search`;
   const ALL_PRODUCTS_API_URL = `${API_BASE_URL}/admin/products`;
+  const DELETE_PRODUCT_API = (id: number) => `${API_BASE_URL}/products/${id}`;
+
   const [searchTerm, setSearchTerm] = useState("");
+
   const { data: products, error, isLoading } = useSWR(
     searchTerm ? `${SEARCH_API_URL}?name=${searchTerm}&page=1&limit=20` : ALL_PRODUCTS_API_URL,
     fetcher,
     { revalidateOnFocus: false }
   );
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    const token = Cookies.get("token");
+    try {
+      const response = await fetch(DELETE_PRODUCT_API(id), {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete product.");
+      }
+
+      toast.success("Product deleted successfully!");
+      mutate(ALL_PRODUCTS_API_URL); // 🔄 Update data tanpa reload halaman
+    } catch (error) {
+      toast.error("Failed to delete product. Please try again.");
+    }
+  };
 
   if (error) {
     toast.error(`Failed to fetch products: ${error.message}`);
@@ -74,9 +102,7 @@ export const Database = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full max-w-md"
         />
-        <Button variant="outline" onClick={() => {}}>
-          Search
-        </Button>
+        <Button variant="outline">Search</Button>
       </div>
 
       {/* Loading Skeleton */}
@@ -102,7 +128,17 @@ export const Database = () => {
       {!isLoading && products?.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {products.map((product: Product) => (
-            <div key={product.id} className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col text-sm">
+            <div key={product.id} className="relative bg-white shadow-md rounded-lg overflow-hidden flex flex-col text-sm">
+              {/* 🔥 Tombol Delete */}
+              <Button
+                onClick={() => handleDelete(product.id)}
+                className="absolute bottom-2 right-2 text-red-500 p-2 hover:bg-red-300 rounded-md"
+                aria-label="Delete product"
+                variant="ghost"
+              >
+                <Trash2 size={18} />
+              </Button>
+
               <div className="relative w-full h-40 bg-gray-100 flex items-center justify-center">
                 <Image src={product.photo} alt={product.name} layout="fill" objectFit="contain" className="p-3" />
               </div>
