@@ -33,12 +33,6 @@ export const Database = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const SEARCH_API_URL = `${API_BASE_URL}/products/search`;
   const ALL_PRODUCTS_API_URL = `${API_BASE_URL}/admin/products`;
-
-  console.log("API BASE URL:", API_BASE_URL);
-  console.log("Search API URL:", SEARCH_API_URL);
-  console.log("All Products API URL:", ALL_PRODUCTS_API_URL);
-  console.log("TOKEN:", token);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
