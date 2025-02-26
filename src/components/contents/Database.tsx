@@ -89,7 +89,7 @@ export const Database = () => {
 
       toast.success("Product deleted successfully!");
       mutate(ALL_PRODUCTS_API_URL);
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete product. Please try again.");
     }
   };
