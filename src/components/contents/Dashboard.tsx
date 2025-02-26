@@ -8,8 +8,15 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 interface Category {
   id: number;
@@ -46,7 +53,7 @@ export const Dashboard = () => {
     handleSubmit,
     setValue,
     formState: { isSubmitting },
-  } = useForm<ProductFormData>(); // 👈 Tambahkan generic type
+  } = useForm<ProductFormData>(); 
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -72,14 +79,24 @@ export const Dashboard = () => {
 
     fetchCategories();
   }, []);
+  const formatRupiah = (value: string) => {
+    const number = value.replace(/\D/g, ""); // Hapus karakter non-angka
+    return new Intl.NumberFormat("id-ID").format(parseInt(number || "0"));
+  };
 
+  // 🏷 Handle perubahan input harga
+  const handlePriceChange = (field: "price_a" | "price_b", value: string) => {
+    setValue(field, `Rp ${formatRupiah(value)}`);
+  };
   const onSubmit = async (data: ProductFormData) => {
     if (!data.photo || data.photo.length === 0) {
       toast.error("Please upload a product photo.");
       return;
     }
 
-    const category = categories.find((cat) => cat.id === parseInt(data.category_product_id));
+    const category = categories.find(
+      (cat) => cat.id === parseInt(data.category_product_id)
+    );
     const endpoint =
       category?.type === "BEVERAGE"
         ? `${API_BASE_URL}/products/beverages`
@@ -91,15 +108,21 @@ export const Dashboard = () => {
     formData.append("photo", data.photo[0]); // 👈 Ambil file pertama dari FileList
     formData.append("category_product_id", data.category_product_id);
     formData.append("barcode", data.barcode);
-    formData.append("price_a", data.price_a);
-    formData.append("price_b", data.price_b);
-    formData.append("nutritionFact.energy", data.energy);
-    formData.append("nutritionFact.saturated_fat", data.saturated_fat);
-    formData.append("nutritionFact.sugar", data.sugar);
-    formData.append("nutritionFact.sodium", data.sodium);
-    formData.append("nutritionFact.protein", data.protein);
-    formData.append("nutritionFact.fiber", data.fiber);
-    formData.append("nutritionFact.fruit_vegetable", data.fruit_vegetable);
+    formData.append("price_a", data.price_a.replace(/Rp\s|\./g, "")); // Hapus "Rp" dan titik sebelum dikirim ke API
+    formData.append("price_b", data.price_b.replace(/Rp\s|\./g, ""));
+    formData.append("nutritionFact.energy", data.energy.replace(",", "."));
+    formData.append(
+      "nutritionFact.saturated_fat",
+      data.saturated_fat.replace(",", ".")
+    );
+    formData.append("nutritionFact.sugar", data.sugar.replace(",", "."));
+    formData.append("nutritionFact.sodium", data.sodium.replace(",", "."));
+    formData.append("nutritionFact.protein", data.protein.replace(",", "."));
+    formData.append("nutritionFact.fiber", data.fiber.replace(",", "."));
+    formData.append(
+      "nutritionFact.fruit_vegetable",
+      data.fruit_vegetable.replace(",", ".")
+    );
 
     try {
       const response = await fetch(endpoint, {
@@ -146,22 +169,46 @@ export const Dashboard = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Label>Name</Label>
-            <Input type="text" {...register("name", { required: true })} placeholder="Product Name" />
+            <Input
+              type="text"
+              {...register("name", { required: true })}
+              placeholder="Product Name"
+            />
 
             <Label>Brand</Label>
-            <Input type="text" {...register("brand", { required: true })} placeholder="Brand" />
+            <Input
+              type="text"
+              {...register("brand", { required: true })}
+              placeholder="Brand"
+            />
 
             <Label>Barcode</Label>
-            <Input type="text" {...register("barcode", { required: true })} placeholder="Barcode" />
+            <Input
+              type="text"
+              {...register("barcode", { required: true })}
+              placeholder="Barcode"
+            />
 
             <Label>Price A</Label>
-            <Input type="number" {...register("price_a", { required: true })} placeholder="Price A" />
+            <Input
+              type="text"
+              {...register("price_a", { required: true })}
+              placeholder="Rp 0"
+              onChange={(e) => handlePriceChange("price_a", e.target.value)}
+            />
 
             <Label>Price B</Label>
-            <Input type="number" {...register("price_b", { required: true })} placeholder="Price B" />
+            <Input
+              type="text"
+              {...register("price_b", { required: true })}
+              placeholder="Rp 0"
+              onChange={(e) => handlePriceChange("price_b", e.target.value)}
+            />
 
             <Label>Category</Label>
-            <Select onValueChange={(value) => setValue("category_product_id", value)}>
+            <Select
+              onValueChange={(value) => setValue("category_product_id", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
@@ -175,20 +222,53 @@ export const Dashboard = () => {
             </Select>
 
             <Label>Product Photo</Label>
-            <Input type="file" accept="image/*" {...register("photo", { required: true })} onChange={handleFileChange} />
+            <Input
+              type="file"
+              accept="image/*"
+              {...register("photo", { required: true })}
+              onChange={handleFileChange}
+            />
           </div>
 
-          {previewImage && <img src={previewImage} alt="Preview" className="mt-4 w-32 h-32 object-cover" />}
+          {previewImage && (
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="mt-4 w-32 h-32 object-cover"
+            />
+          )}
 
           <h2 className="text-lg font-bold mt-6 mb-4">Nutrition Facts</h2>
           <div className="grid grid-cols-2 gap-4">
-            {["energy", "saturated_fat", "sugar", "sodium", "protein", "fiber", "fruit_vegetable"].map((key) => (
-              <Input key={key} type="number" {...register(key as keyof ProductFormData, { required: true })} placeholder={key.replace("_", " ")} />
+            {[
+              "energy",
+              "saturated_fat",
+              "sugar",
+              "sodium",
+              "protein",
+              "fiber",
+              "fruit_vegetable",
+            ].map((key) => (
+              <Input
+                key={key}
+                type="text"
+                {...register(key as keyof ProductFormData, { required: true })}
+                placeholder={key.replace("_", " ")}
+                pattern="[0-9]+([,\.][0-9]+)?"
+              />
             ))}
           </div>
 
-          <Button type="submit" className="w-full mt-6 bg-[#2B59C3] hover:bg-[#2B59C3]" disabled={isSubmitting}>
-            {isSubmitting ? "Processing..." : "Add Product"}
+          <Button
+            type="submit"
+            className="w-full mt-6 bg-[#2B59C3] hover:bg-[#2B59C3]"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-5 h-5 animate-spin mx-auto" />
+            ) : (
+              "Add Product"
+            )}
           </Button>
         </form>
       </div>
