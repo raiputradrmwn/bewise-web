@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import useSWR, { mutate } from "swr"; // Gunakan mutate untuk update cache
+import React, { useState, useEffect } from "react";
+import useSWR, { mutate } from "swr";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -62,6 +62,14 @@ export const Database = () => {
     { revalidateOnFocus: false }
   );
 
+  // 🔥 Tampilkan Toast Error saat fetch gagal (Hindari infinite re-render)
+  useEffect(() => {
+    if (error) {
+      toast.error(`Failed to fetch products: ${error.message}`);
+    }
+  }, [error]);
+
+  // 🔥 Fungsi Delete Produk
   const handleDelete = async (id: number) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
 
@@ -80,20 +88,17 @@ export const Database = () => {
       }
 
       toast.success("Product deleted successfully!");
-      mutate(ALL_PRODUCTS_API_URL); // 🔄 Update data tanpa reload halaman
+      mutate(ALL_PRODUCTS_API_URL);
     } catch (error) {
       toast.error("Failed to delete product. Please try again.");
     }
   };
 
-  if (error) {
-    toast.error(`Failed to fetch products: ${error.message}`);
-  }
-
   return (
     <div className="min-h-screen p-6">
       <ToastContainer position="top-right" autoClose={3000} />
       <h1 className="text-xl font-bold mb-4">Products Database</h1>
+
       <div className="flex items-center gap-2 mb-4">
         <Input
           type="text"
@@ -104,6 +109,9 @@ export const Database = () => {
         />
         <Button variant="outline">Search</Button>
       </div>
+
+      {/* 🔴 Tampilkan pesan error di UI jika gagal fetch */}
+      {error && <p className="text-red-500 text-center">Failed to load products. Please try again.</p>}
 
       {/* Loading Skeleton */}
       {isLoading && (
