@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trash2 } from "lucide-react"; // Icon delete dari Lucide
+import { Trash2 } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 interface Product {
   id: number;
@@ -55,6 +56,7 @@ export const Database = () => {
   const DELETE_PRODUCT_API = (id: number) => `${API_BASE_URL}/products/${id}`;
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const { data: products, error, isLoading } = useSWR(
     searchTerm ? `${SEARCH_API_URL}?name=${searchTerm}&page=1&limit=20` : ALL_PRODUCTS_API_URL,
@@ -62,20 +64,18 @@ export const Database = () => {
     { revalidateOnFocus: false }
   );
 
-  // 🔥 Tampilkan Toast Error saat fetch gagal (Hindari infinite re-render)
   useEffect(() => {
     if (error) {
       toast.error(`Failed to fetch products: ${error.message}`);
     }
   }, [error]);
 
-  // 🔥 Fungsi Delete Produk
-  const handleDelete = async (id: number) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+  const handleDelete = async () => {
+    if (!selectedProduct) return;
 
     const token = Cookies.get("token");
     try {
-      const response = await fetch(DELETE_PRODUCT_API(id), {
+      const response = await fetch(DELETE_PRODUCT_API(selectedProduct.id), {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -91,6 +91,8 @@ export const Database = () => {
       mutate(ALL_PRODUCTS_API_URL);
     } catch {
       toast.error("Failed to delete product. Please try again.");
+    } finally {
+      setSelectedProduct(null);
     }
   };
 
@@ -110,10 +112,8 @@ export const Database = () => {
         <Button variant="outline">Search</Button>
       </div>
 
-      {/* 🔴 Tampilkan pesan error di UI jika gagal fetch */}
       {error && <p className="text-red-500 text-center">Failed to load products. Please try again.</p>}
 
-      {/* Loading Skeleton */}
       {isLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
@@ -130,16 +130,14 @@ export const Database = () => {
         </div>
       )}
 
-      {/* Tampilkan hasil pencarian atau semua data */}
       {!isLoading && products?.length === 0 && <p className="text-gray-500 text-center">No products found.</p>}
 
       {!isLoading && products?.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {products.map((product: Product) => (
             <div key={product.id} className="relative bg-white shadow-md rounded-lg overflow-hidden flex flex-col text-sm">
-              {/* 🔥 Tombol Delete */}
               <Button
-                onClick={() => handleDelete(product.id)}
+                onClick={() => setSelectedProduct(product)}
                 className="absolute bottom-2 right-2 text-red-500 p-2 hover:bg-red-300 rounded-md"
                 aria-label="Delete product"
                 variant="ghost"
@@ -167,6 +165,25 @@ export const Database = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {selectedProduct && (
+        <Dialog open={!!selectedProduct} onOpenChange={() => setSelectedProduct(null)}>
+          <DialogContent>
+            <DialogTitle>Delete Product</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete <strong>{selectedProduct.name}</strong>? This action cannot be undone.
+            </DialogDescription>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setSelectedProduct(null)}>
+                Cancel
+              </Button>
+              <Button className="bg-red-500 text-white" onClick={handleDelete}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

@@ -16,7 +16,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
 
 interface Category {
   id: number;
@@ -53,7 +52,7 @@ export const Dashboard = () => {
     handleSubmit,
     setValue,
     formState: { isSubmitting },
-  } = useForm<ProductFormData>(); 
+  } = useForm<ProductFormData>();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -79,15 +78,14 @@ export const Dashboard = () => {
 
     fetchCategories();
   }, []);
+
   const formatRupiah = (value: string) => {
-    const number = value.replace(/\D/g, ""); // Hapus karakter non-angka
-    return new Intl.NumberFormat("id-ID").format(parseInt(number || "0"));
+    const number = value.replace(/\D/g, ""); // Hapus semua karakter non-angka
+    return number
+      ? `Rp ${new Intl.NumberFormat("id-ID").format(parseInt(number))}`
+      : "Rp 0";
   };
 
-  // 🏷 Handle perubahan input harga
-  const handlePriceChange = (field: "price_a" | "price_b", value: string) => {
-    setValue(field, `Rp ${formatRupiah(value)}`);
-  };
   const onSubmit = async (data: ProductFormData) => {
     if (!data.photo || data.photo.length === 0) {
       toast.error("Please upload a product photo.");
@@ -105,11 +103,11 @@ export const Dashboard = () => {
     const formData = new FormData();
     formData.append("name", data.name);
     formData.append("brand", data.brand);
-    formData.append("photo", data.photo[0]); // 👈 Ambil file pertama dari FileList
+    formData.append("photo", data.photo[0]);
     formData.append("category_product_id", data.category_product_id);
     formData.append("barcode", data.barcode);
-    formData.append("price_a", data.price_a.replace(/Rp\s|\./g, "")); // Hapus "Rp" dan titik sebelum dikirim ke API
-    formData.append("price_b", data.price_b.replace(/Rp\s|\./g, ""));
+    formData.append("price_a", data.price_a.replace(/\D/g, "")); // Hapus Rp dan titik
+    formData.append("price_b", data.price_b.replace(/\D/g, "")); // Hapus Rp dan titik
     formData.append("nutritionFact.energy", data.energy.replace(",", "."));
     formData.append(
       "nutritionFact.saturated_fat",
@@ -194,7 +192,9 @@ export const Dashboard = () => {
               type="text"
               {...register("price_a", { required: true })}
               placeholder="Rp 0"
-              onChange={(e) => handlePriceChange("price_a", e.target.value)}
+              onChange={(e) =>
+                setValue("price_a", formatRupiah(e.target.value))
+              }
             />
 
             <Label>Price B</Label>
@@ -202,7 +202,9 @@ export const Dashboard = () => {
               type="text"
               {...register("price_b", { required: true })}
               placeholder="Rp 0"
-              onChange={(e) => handlePriceChange("price_b", e.target.value)}
+              onChange={(e) =>
+                setValue("price_b", formatRupiah(e.target.value))
+              }
             />
 
             <Label>Category</Label>
@@ -251,7 +253,9 @@ export const Dashboard = () => {
             ].map((key) => (
               <Input
                 key={key}
-                type="text"
+                type="number"
+                step="0.01"
+                min="0"
                 {...register(key as keyof ProductFormData, { required: true })}
                 placeholder={key.replace("_", " ")}
                 pattern="[0-9]+([,\.][0-9]+)?"
@@ -264,11 +268,7 @@ export const Dashboard = () => {
             className="w-full mt-6 bg-[#2B59C3] hover:bg-[#2B59C3]"
             disabled={isSubmitting}
           >
-            {isSubmitting ? (
-              <Loader2 className="w-5 h-5 animate-spin mx-auto" />
-            ) : (
-              "Add Product"
-            )}
+            {isSubmitting ? "Processing..." : "Add Product"}
           </Button>
         </form>
       </div>
