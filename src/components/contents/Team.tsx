@@ -12,7 +12,7 @@ const teamMembers = [
   {
     name: "Dr. Iwan Iwut Tritosasmo, S.T., M.T.",
     position: "Co-Founder",
-    image: "/img/team/sao.png",
+    image: "/img/team/iwn.png",
   },
   {
     name: "Raihan Putra Darmawan",
