@@ -254,7 +254,7 @@ export const Dashboard = () => {
               <Input
                 key={key}
                 type="number"
-                step="0.01"
+                step="0.001"
                 min="0"
                 {...register(key as keyof ProductFormData, { required: true })}
                 placeholder={key.replace("_", " ")}
