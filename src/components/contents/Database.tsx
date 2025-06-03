@@ -90,8 +90,6 @@ const fetcher = async (url: string) => {
   };
 };
 
-
-
 export const Database = () => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
   const SEARCH_API_URL = `${API_BASE_URL}/products/search`;

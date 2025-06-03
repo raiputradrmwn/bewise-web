@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { IconUpload } from "@tabler/icons-react";
+import { useDropzone } from "react-dropzone";
 interface Category {
   id: number;
   name: string;
@@ -150,6 +151,18 @@ export default function AddProductPage() {
       reader.readAsDataURL(file);
     }
   };
+  const onDrop = (acceptedFiles: File[]) => {
+    setPreviewImage(URL.createObjectURL(acceptedFiles[0]));
+    const dataTransfer = new DataTransfer();
+    acceptedFiles.forEach(file => dataTransfer.items.add(file));
+    setValue("photo", dataTransfer.files, { shouldValidate: true });
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    accept: { "image/*": [] },
+    multiple: false,
+    onDrop,
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center px-2">
@@ -240,7 +253,11 @@ export default function AddProductPage() {
 
             <div>
               <Label htmlFor="photo">Product Photo</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center mt-1">
+              <div
+                {...getRootProps()}
+                className={`border-2 border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center mt-1 cursor-pointer ${isDragActive ? "bg-blue-50 border-blue-400" : ""
+                  }`}
+              >
                 <Input
                   id="photo"
                   type="file"
@@ -248,6 +265,7 @@ export default function AddProductPage() {
                   {...register("photo", { required: true })}
                   onChange={handleFileChange}
                   className="border-0 opacity-0 cursor-pointer absolute inset-0"
+                  {...getInputProps()} name="photo"
                 />
 
                 <label
@@ -256,7 +274,7 @@ export default function AddProductPage() {
                 >
                   <IconUpload className="w-8 h-8 text-gray-400 mb-2" />
                   <span className="font-medium text-gray-500">
-                    Upload a product photo
+                    {isDragActive ? "Drop the files here ..." : "Upload a product photo"}
                   </span>
                   <span className="text-xs text-gray-400">
                     Drag and drop or click to browse
@@ -317,7 +335,7 @@ export default function AddProductPage() {
               <Input
                 id="sodium"
                 type="number"
-                step="0.01"
+                step="0.001"
                 min="0"
                 {...register("sodium", { required: true })}
                 placeholder="0.0"
