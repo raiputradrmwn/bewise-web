@@ -25,6 +25,7 @@ import {
   PaginationPrevious,
   PaginationNext,
 } from "@/components/ui/pagination";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Product {
   id: number;
@@ -99,7 +100,7 @@ export const Database = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [page, setPage] = useState(1);
-
+  const isMobile = useIsMobile();
   const endpoint = searchTerm
     ? `${SEARCH_API_URL}?name=${searchTerm}&page=${page}&limit=${LIMIT}`
     : `${ALL_PRODUCTS_API_URL}?page=${page}&limit=${LIMIT}`;
@@ -147,6 +148,41 @@ export const Database = () => {
   const products = data?.products || [];
   const totalPages = data?.totalPages ?? 1;
   const currentPage = data?.currentPage ?? 1;
+  // Helper buat page number dengan ellipsis
+  function getPagination(currentPage: number, totalPages: number) {
+    const delta = 1;
+    const range = [];
+    const rangeWithDots = [];
+    let l;
+
+    for (
+      let i = 1;
+      i <= totalPages;
+      i++
+    ) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - delta && i <= currentPage + delta)
+      ) {
+        range.push(i);
+      }
+    }
+
+    for (let i of range) {
+      if (l) {
+        if (i - l === 2) {
+          rangeWithDots.push(l + 1);
+        } else if (i - l !== 1) {
+          rangeWithDots.push('...');
+        }
+      }
+      rangeWithDots.push(i);
+      l = i;
+    }
+
+    return rangeWithDots;
+  }
 
   return (
     <div className="min-h-screen p-6">
@@ -249,8 +285,8 @@ export const Database = () => {
               </div>
             ))}
           </div>
-          <Pagination className="mt-6 flex justify-center">
-            <PaginationContent>
+          <Pagination className="mt-6 flex justify-center w-full overflow-x-auto">
+            <PaginationContent className="flex flex-nowrap gap-1 px-1">
               <PaginationItem>
                 <PaginationPrevious
                   href="#"
@@ -262,20 +298,66 @@ export const Database = () => {
                   tabIndex={currentPage === 1 ? -1 : 0}
                 />
               </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i + 1}>
-                  <PaginationLink
-                    href="#"
-                    isActive={currentPage === i + 1}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage(i + 1);
-                    }}
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
+
+              {/* MOBILE: Hanya prev, current, next */}
+              {isMobile ? (
+                <>
+                  {currentPage > 1 && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={e => {
+                          e.preventDefault();
+                          setPage(currentPage - 1);
+                        }}
+                      >
+                        {currentPage - 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                  <PaginationItem>
+                    <PaginationLink isActive href="#" onClick={e => e.preventDefault()}>
+                      {currentPage}
+                    </PaginationLink>
+                  </PaginationItem>
+                  {currentPage < totalPages && (
+                    <PaginationItem>
+                      <PaginationLink
+                        href="#"
+                        onClick={e => {
+                          e.preventDefault();
+                          setPage(currentPage + 1);
+                        }}
+                      >
+                        {currentPage + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )}
+                </>
+              ) : (
+                // DESKTOP: Tampilkan angka dan ellipsis
+                getPagination(currentPage, totalPages).map((pageNum, idx) =>
+                  pageNum === "..." ? (
+                    <PaginationItem key={pageNum + idx}>
+                      <span className="px-2 text-gray-500">...</span>
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={pageNum}>
+                      <PaginationLink
+                        href="#"
+                        isActive={currentPage === pageNum}
+                        onClick={e => {
+                          e.preventDefault();
+                          setPage(Number(pageNum));
+                        }}
+                      >
+                        {pageNum}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )
+              )}
+
               <PaginationItem>
                 <PaginationNext
                   href="#"
@@ -288,6 +370,7 @@ export const Database = () => {
                 />
               </PaginationItem>
             </PaginationContent>
+
           </Pagination>
         </>
       )}
