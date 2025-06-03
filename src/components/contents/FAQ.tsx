@@ -1,26 +1,24 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button } from "../ui/button";
-import Link from "next/link";
 import { SkeletonFAQ } from "./SkeletonCard";
 
 const FAQ = () => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [activeIndex, setActiveIndex] = useState<number | null>(null);
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500); // Simulate loading delay
-  
-      return () => clearTimeout(timer); // Cleanup timer on component unmount
-    }, []);
-  
-    if (isLoading) {
-      return (
-          <SkeletonFAQ /> 
-      );
-    }
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500); // Simulate loading delay
+
+    return () => clearTimeout(timer); // Cleanup timer on component unmount
+  }, []);
+
+  if (isLoading) {
+    return (
+      <SkeletonFAQ />
+    );
+  }
   const faqData = [
     {
       question: "What is the main purpose of this application?",
@@ -85,60 +83,24 @@ const FAQ = () => {
         </div>
       </div>
 
-      {/* App Download Section */}
-      <div className="mt-16 bg-[#2B59C3] text-white py-12 px-6 rounded-lg text-center mx-auto max-w-5xl">
+      {/* App Download QR Section */}
+      <div className="mt-14 bg-[#2B59C3] text-white py-10 px-6 rounded-lg text-center mx-auto max-w-7xl">
         <h2 className="text-2xl md:text-3xl font-bold">
           Download Our App <span className="text-[#ECFEAA]">Free</span> and
-          Explore Smarter Nutrition{" "}
-          <span className="text-[#ECFEAA]">Choices!</span>
+          Explore Smarter Nutrition <span className="text-[#ECFEAA]">Choices!</span>
         </h2>
         <p className="text-white font-regular text-[14px] opacity-80 mt-4">
-          Get access to detailed nutritional insights, personalized product
-          suggestions, and easy food label decoding. Take the first step towards
-          healthier living today!
+          Scan the QR code below to download the app and start your healthier journey!
         </p>
-        <div className="flex justify-center gap-8 mt-8">
-          {/* Google Play Button */}
-          <Link
-            href="https://play.google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button className="flex items-center bg-black text-white px-6 py-7 rounded-lg hover:bg-gray-800 transition">
-              <Image
-                src="/img/playstore.svg"
-                alt="Google Play"
-                width={30}
-                height={30}
-                className="mr-2"
-              />
-              <div className="text-left">
-                <p className="text-xs">Get it on</p>
-                <p className="text-sm font-bold">Google Play</p>
-              </div>
-            </Button>
-          </Link>
-
-          {/* App Store Button */}
-          <Link
-            href="https://www.apple.com/app-store/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Button className="flex items-center bg-black text-white px-6 py-7 rounded-lg hover:bg-gray-800 transition">
-              <Image
-                src="/img/apple1.svg"
-                alt="App Store"
-                width={30}
-                height={30}
-                className="mr-2"
-              />
-              <div className="text-left">
-                <p className="text-xs">Get it on</p>
-                <p className="text-sm font-bold">Apple Store</p>
-              </div>
-            </Button>
-          </Link>
+        <div className="flex flex-col items-center justify-center mt-8">
+          <Image
+            src="/img/bewiseqr.png"
+            alt="Download App QR Code"
+            width={160}
+            height={160}
+            className="rounded-lg border-4 border-white shadow-xl"
+          />
+          <span className="mt-3 text-base opacity-80">Scan QR with your phone camera</span>
         </div>
       </div>
     </section>
