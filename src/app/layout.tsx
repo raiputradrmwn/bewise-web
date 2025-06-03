@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { METADATA } from "./metadata";
+import { poppins } from "@/styles/font";
 
 export const metadata: Metadata = {
   title: {
@@ -47,7 +48,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className='bg-[#F8F8F8] font-lineSeed'
+        className={`${poppins.className} bg-[#F5F5F5]`}
       >
         {children}
       </body>
